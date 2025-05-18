@@ -1,5 +1,3 @@
-# Modelado Predictivo con Descenso de Gradiente
-
 **Grupo:** InfoTurins
 
 **Integrantes**
@@ -12,7 +10,18 @@
 | 4  | AXEL JARED HERNANDEZ SERVELLON            |
 | 5  | JOSUE ALFREDO MEJIA URIAS                 |
 
+## Parte 1: Documento con Investigación teórica
+Contiene el informe final y los archivos fuente en LaTeX del estudio comparativo de dos métodos numéricos de optimización: Gradiente Descendente y Newton-Raphson.
 
+### Cómo compilar el informe
+
+1. Extrae el contenido del archivo `.zip`.
+2. Abre el archivo `.tex` principal con Overleaf o TeXstudio.
+3. Compila con **PDFLaTeX**.
+
+---
+
+## Parte 2: Modelado Predictivo con Descenso de Gradiente
 
 ##  Descripción
 
@@ -42,5 +51,3 @@ Si estás utilizando Jupyter Notebook o Google Colab, puedes ejecutar el siguien
 ```bash
 !pip install pandas matplotlib seaborn numpy
 ```
-
-
