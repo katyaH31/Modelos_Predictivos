@@ -1,55 +1,65 @@
 import gradio as gr
 import numpy as np
-from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
 
-# Cargar el conjunto de datos Iris para regresión logística
+# Cargar el conjunto de datos Iris
 iris = load_iris()
 X_iris = iris.data
 y_iris = iris.target
 
-# Modelo de Regresión Lineal Multivariante
-linear_model = LinearRegression()
+# --------- Custom Logistic Regression (One-vs-Rest, Gradient Descent) ---------
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
-# Ajustar el modelo de regresión lineal con datos ficticios (falta el ajuste real)
-X_dummy = np.random.rand(100, 4)  # 4 características
-y_dummy = np.random.rand(100)     # Variable objetivo
-linear_model.fit(X_dummy, y_dummy)
+def gradient_descent(X, y, lr=0.1, epochs=1000):
+    m, n = X.shape
+    X = np.hstack((np.ones((m,1)), X))
+    weights = np.zeros(n + 1)
+    for _ in range(epochs):
+        z = np.dot(X, weights)
+        h = sigmoid(z)
+        grad = np.dot(X.T, (h - y)) / m
+        weights -= lr * grad
+    return weights
 
-# Modelo de Regresión Logística Multiclase (falta el ajuste real)
-logistic_model = LogisticRegression(max_iter=200)
-logistic_model.fit(X_iris, y_iris)
+def predict_custom(X, weights_all):
+    X = np.hstack((np.ones((X.shape[0],1)), X))
+    preds = np.array([sigmoid(np.dot(X, w)) for w in weights_all]).T
+    return np.argmax(preds, axis=1)
 
-# Función para manejar las predicciones
-def predict(sepal_length, sepal_width, petal_length, petal_width, model_type):
+# Escalar los datos para el modelo personalizado
+scaler_custom = StandardScaler()
+X_iris_scaled = scaler_custom.fit_transform(X_iris)
+
+# Entrenar modelo personalizado One-vs-Rest
+weights_all_custom = []
+for class_label in np.unique(y_iris):
+    y_binary = (y_iris == class_label).astype(int)
+    weights = gradient_descent(X_iris_scaled, y_binary, lr=0.1, epochs=1000)
+    weights_all_custom.append(weights)
+
+# ------------------- Función de predicción -------------------
+def predict(sepal_length, sepal_width, petal_length, petal_width):
     input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
-    if model_type == "Multivariate Linear Regression":
-        prediction = linear_model.predict(input_data)
-        return f"Linear Regression Prediction: {prediction[0]:.2f}"
-    elif model_type == "Multiclass Logistic Regression":
-        prediction = logistic_model.predict(input_data)
-        class_name = iris.target_names[prediction[0]]
-        return f"Logistic Regression Prediction: {class_name}"
+    input_scaled = scaler_custom.transform(input_data)
+    pred_idx = predict_custom(input_scaled, weights_all_custom)[0]
+    class_name = iris.target_names[pred_idx]
+    return f"Predicción (Regresión Logística Custom GD): {class_name}"
 
-# Función para limpiar las entradas
+# ------------------- Función para limpiar las entradas -------------------
 def clear_inputs():
-    return 0.0, 0.0, 0.0, 0.0, "Multivariate Linear Regression"
+    return 0.0, 0.0, 0.0, 0.0
 
-# Interfaz de Gradio
+# ------------------- Interfaz de Gradio -------------------
 with gr.Blocks() as demo:
-    gr.Markdown("## Regression Application")
+    gr.Markdown("## Clasificación Iris con Regresión Logística (Descenso de Gradiente Custom)")
     
     with gr.Row():
         sepal_length = gr.Number(label="Sepal Length (cm)", value=0.0)
         sepal_width = gr.Number(label="Sepal Width (cm)", value=0.0)
         petal_length = gr.Number(label="Petal Length (cm)", value=0.0)
         petal_width = gr.Number(label="Petal Width (cm)", value=0.0)
-    
-    model_type = gr.Radio(
-        ["Multivariate Linear Regression", "Multiclass Logistic Regression"],
-        label="Select Model",
-        value="Multivariate Linear Regression"
-    )
     
     output = gr.Textbox(label="Output")
     
@@ -59,13 +69,13 @@ with gr.Blocks() as demo:
     
     submit_button.click(
         predict,
-        inputs=[sepal_length, sepal_width, petal_length, petal_width, model_type],
+        inputs=[sepal_length, sepal_width, petal_length, petal_width],
         outputs=output
     )
     clear_button.click(
         clear_inputs,
         inputs=[],
-        outputs=[sepal_length, sepal_width, petal_length, petal_width, model_type]
+        outputs=[sepal_length, sepal_width, petal_length, petal_width]
     )
 
 # Lanzar la aplicación
