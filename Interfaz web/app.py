@@ -1,7 +1,37 @@
 import gradio as gr
+import csv
+import os
 import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
+
+# ---------------------------------------
+# CONFIGURACIÓN DE HISTORIAL
+# ---------------------------------------
+HISTORY_FILE = "historial.csv"
+
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, mode="r", newline="") as f:
+            reader = csv.reader(f)
+            #Convirtiendo a float 
+            return[
+                [float(row[0]), float(row[1]), float(row[2]), float(row[3]), row[4]]
+                for row in reader
+            ]
+    return []
+
+def save_history_row(row):
+    with open(HISTORY_FILE, mode="a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(row)
+
+def clear_history_file():
+    if os.path.exists(HISTORY_FILE):
+        os.remove(HISTORY_FILE)
+
+# Carga el historial al iniciar
+history = load_history()
 
 # Cargar el conjunto de datos Iris
 iris = load_iris()
@@ -39,44 +69,77 @@ for class_label in np.unique(y_iris):
     weights = gradient_descent(X_iris_scaled, y_binary, lr=0.1, epochs=1000)
     weights_all_custom.append(weights)
 
+
 # ------------------- Función de predicción -------------------
 def predict(sepal_length, sepal_width, petal_length, petal_width):
     input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
     input_scaled = scaler_custom.transform(input_data)
     pred_idx = predict_custom(input_scaled, weights_all_custom)[0]
     class_name = iris.target_names[pred_idx]
-    return f"Predicción (Regresión Logística Custom GD): {class_name}"
+    result = f"Predicción (Regresión Logística Custom GD): {class_name}"
+
+    image_path = f"./imagenes/{class_name}.jpg"
+    row = [sepal_length, sepal_width, petal_length, petal_width, class_name]
+    history.append(row)
+    save_history_row(row)
+    return result, history, image_path
+
+
 
 # ------------------- Función para limpiar las entradas -------------------
 def clear_inputs():
-    return 0.0, 0.0, 0.0, 0.0
+    history.clear()
+    clear_history_file()
+    return 0.0, 0.0, 0.0, 0.0, [], None
 
 # ------------------- Interfaz de Gradio -------------------
 with gr.Blocks() as demo:
     gr.Markdown("## Clasificación Iris con Regresión Logística (Descenso de Gradiente Custom)")
     
     with gr.Row():
-        sepal_length = gr.Number(label="Sepal Length (cm)", value=0.0)
-        sepal_width = gr.Number(label="Sepal Width (cm)", value=0.0)
-        petal_length = gr.Number(label="Petal Length (cm)", value=0.0)
-        petal_width = gr.Number(label="Petal Width (cm)", value=0.0)
-    
-    output = gr.Textbox(label="Output")
-    
-    with gr.Row():
-        clear_button = gr.Button("Clear")
-        submit_button = gr.Button("Submit")
+         with gr.Column(scale=2):
+            with gr.Row():
+                 sepal_length = gr.Number(label="Sepal Length (cm)", value=0.0)
+                 sepal_width = gr.Number(label="Sepal Width (cm)", value=0.0)
+                 petal_length = gr.Number(label="Petal Length (cm)", value=0.0)
+                 petal_width = gr.Number(label="Petal Width (cm)", value=0.0)
+                 output = gr.Textbox(label="Output")
+                 with gr.Column(scale=4):
+                    with gr.Row():
+                        with gr.Column(scale=1):
+                            image_output = gr.Image(
+                                label="Imagen de la Flor",
+                                type="filepath",
+                                interactive=False,
+                                height=130,
+                                width=130,
+                          )
+                        clear_button = gr.Button("Clear")
+                        submit_button = gr.Button("Submit")
+                        
+
+    history_output = gr.Dataframe(
+        headers=["Sepal Length", "Sepal Width", "Petal Length", "Petal Width", "Predicción"],
+        label="Historial de Predicciones",
+        interactive=False,
+        wrap=True,
+        value=history 
+    )
     
     submit_button.click(
         predict,
         inputs=[sepal_length, sepal_width, petal_length, petal_width],
-        outputs=output
+        outputs=[output, history_output, image_output]
     )
+    
     clear_button.click(
         clear_inputs,
         inputs=[],
-        outputs=[sepal_length, sepal_width, petal_length, petal_width]
+        outputs=[sepal_length, sepal_width, petal_length, petal_width, history_output, image_output]
     )
+    
+
+
 
 # Lanzar la aplicación
 demo.launch()
