@@ -5,9 +5,8 @@ import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
 
-# ---------------------------------------
-# CONFIGURACIÓN DE HISTORIAL
-# ---------------------------------------
+
+# ---------CONFIGURACIÓN DE HISTORIAL----------
 HISTORY_FILE = "historial.csv"
 
 def load_history():
@@ -30,8 +29,6 @@ def clear_history_file():
     if os.path.exists(HISTORY_FILE):
         os.remove(HISTORY_FILE)
 
-# Carga el historial al iniciar
-history = load_history()
 
 # Cargar el conjunto de datos Iris
 iris = load_iris()
@@ -72,6 +69,8 @@ for class_label in np.unique(y_iris):
 
 # ------------------- Función de predicción -------------------
 def predict(sepal_length, sepal_width, petal_length, petal_width):
+    if all(float(val) == 0.0 for val in [sepal_length, sepal_width, petal_length, petal_width]):
+        return "⚠️ Por favor ingresa valores válidos (mayores a cero).", load_history(), None
     input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
     input_scaled = scaler_custom.transform(input_data)
     pred_idx = predict_custom(input_scaled, weights_all_custom)[0]
@@ -80,42 +79,45 @@ def predict(sepal_length, sepal_width, petal_length, petal_width):
 
     image_path = f"./imagenes/{class_name}.jpg"
     row = [sepal_length, sepal_width, petal_length, petal_width, class_name]
+    
+    history = load_history()
     history.append(row)
     save_history_row(row)
+
     return result, history, image_path
 
 
 
 # ------------------- Función para limpiar las entradas -------------------
 def clear_inputs():
-    history.clear()
     clear_history_file()
     return 0.0, 0.0, 0.0, 0.0, [], None
 
 # ------------------- Interfaz de Gradio -------------------
-with gr.Blocks() as demo:
-    gr.Markdown("## Clasificación Iris con Regresión Logística (Descenso de Gradiente Custom)")
-    
+def iris_interface():
+    history = load_history()
+    with gr.Blocks() as demo:
+        gr.Markdown("## Clasificación Iris con Regresión Logística (Descenso de Gradiente Custom)")
     with gr.Row():
-         with gr.Column(scale=2):
+        with gr.Column(scale=2):
             with gr.Row():
-                 sepal_length = gr.Number(label="Sepal Length (cm)", value=0.0)
-                 sepal_width = gr.Number(label="Sepal Width (cm)", value=0.0)
-                 petal_length = gr.Number(label="Petal Length (cm)", value=0.0)
-                 petal_width = gr.Number(label="Petal Width (cm)", value=0.0)
-                 output = gr.Textbox(label="Output")
-                 with gr.Column(scale=4):
-                    with gr.Row():
-                        with gr.Column(scale=1):
-                            image_output = gr.Image(
+                sepal_length = gr.Number(label="Sepal Length (cm)", value=0.0)
+                sepal_width = gr.Number(label="Sepal Width (cm)", value=0.0)
+                petal_length = gr.Number(label="Petal Length (cm)", value=0.0)
+                petal_width = gr.Number(label="Petal Width (cm)", value=0.0)
+                output = gr.Textbox(label="Output")
+        with gr.Column(scale=4):
+            with gr.Row():
+                with gr.Column(scale=1):
+                    image_output = gr.Image(
                                 label="Imagen de la Flor",
                                 type="filepath",
                                 interactive=False,
-                                height=130,
-                                width=130,
+                                height=267,
+                                width=300,
                           )
-                        clear_button = gr.Button("Clear")
-                        submit_button = gr.Button("Submit")
+                clear_button = gr.Button("Clear")
+                submit_button = gr.Button("Submit")
                         
 
     history_output = gr.Dataframe(
@@ -137,9 +139,7 @@ with gr.Blocks() as demo:
         inputs=[],
         outputs=[sepal_length, sepal_width, petal_length, petal_width, history_output, image_output]
     )
-    
-
 
 
 # Lanzar la aplicación
-demo.launch()
+    return demo
