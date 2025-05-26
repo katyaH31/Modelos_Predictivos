@@ -1,4 +1,4 @@
-**Grupo:** InfoTurins
+#  **Grupo:** InfoTurins
 
 **Integrantes**
 
