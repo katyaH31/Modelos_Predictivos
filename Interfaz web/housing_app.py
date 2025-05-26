@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler
 HISTORY_FILE = "historial_housing.csv"
 
 def load_history():
+    # Carga historial de predicciones desde archivo CSV.
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, mode="r", newline="") as f:
             reader = csv.reader(f)
@@ -19,11 +20,13 @@ def load_history():
     return []
 
 def save_history_row(row):
+    # Guarda una nueva predicción en el historial CSV.
     with open(HISTORY_FILE, mode="a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(row)
 
 def clear_history_file():
+    # Borra el archivo de historial para reiniciarlo.
     if os.path.exists(HISTORY_FILE):
         os.remove(HISTORY_FILE)
 
@@ -49,7 +52,8 @@ feature_names = X.columns.tolist()
 
 # FUNCIÓN DE PREDICCIÓN CON VALIDACIÓN
 def predict_value(*inputs):
-    # Validar que no todos los valores sean cero
+    # Predice el valor de vivienda según entradas numéricas.
+    # Valida que no todos los valores sean cero para evitar predicciones inválidas.
     if all(float(val) == 0.0 for val in inputs):
         return "⚠️ Por favor ingresa valores distintos de cero. Todos los campos están en 0.", load_history()
 
@@ -67,12 +71,14 @@ def predict_value(*inputs):
 #
 # FUNCIÓN PARA LIMPIAR ENTRADAS
 def clear_inputs():
+    # Limpia entradas a cero y borra historial de predicciones.
     clear_history_file()
     return [0.0] * len(feature_names), []
 
 
 # INTERFAZ DE GRADIO
 def housing_interface():
+    # Crea la interfaz gráfica con Gradio para la predicción de viviendas.
     history = load_history()  # Cargar historial actualizado
 
     with gr.Blocks() as demo:

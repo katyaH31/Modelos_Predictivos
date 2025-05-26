@@ -10,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 HISTORY_FILE = "historial.csv"
 
 def load_history():
+    # Carga historial de clasificación desde archivo CSV.
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, mode="r", newline="") as f:
             reader = csv.reader(f)
@@ -21,11 +22,13 @@ def load_history():
     return []
 
 def save_history_row(row):
+    # Guarda una nueva predicción en el historial CSV.
     with open(HISTORY_FILE, mode="a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(row)
 
 def clear_history_file():
+    # Borra el archivo de historial para reiniciarlo.
     if os.path.exists(HISTORY_FILE):
         os.remove(HISTORY_FILE)
 
@@ -37,9 +40,11 @@ y_iris = iris.target
 
 # --------- Custom Logistic Regression (One-vs-Rest, Gradient Descent) ---------
 def sigmoid(z):
+    # Función sigmoide para regresión logística.
     return 1 / (1 + np.exp(-z))
 
 def gradient_descent(X, y, lr=0.1, epochs=1000):
+    # Entrena pesos con descenso de gradiente para regresión logística.
     m, n = X.shape
     X = np.hstack((np.ones((m,1)), X))
     weights = np.zeros(n + 1)
@@ -51,6 +56,7 @@ def gradient_descent(X, y, lr=0.1, epochs=1000):
     return weights
 
 def predict_custom(X, weights_all):
+    # Predice la clase usando el modelo one-vs-rest.
     X = np.hstack((np.ones((X.shape[0],1)), X))
     preds = np.array([sigmoid(np.dot(X, w)) for w in weights_all]).T
     return np.argmax(preds, axis=1)
@@ -69,6 +75,7 @@ for class_label in np.unique(y_iris):
 
 # ------------------- Función de predicción -------------------
 def predict(sepal_length, sepal_width, petal_length, petal_width):
+    # Realiza la predicción y actualiza el historial.
     if all(float(val) == 0.0 for val in [sepal_length, sepal_width, petal_length, petal_width]):
         return "⚠️ Por favor ingresa valores válidos (mayores a cero).", load_history(), None
     input_data = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
@@ -90,11 +97,13 @@ def predict(sepal_length, sepal_width, petal_length, petal_width):
 
 # ------------------- Función para limpiar las entradas -------------------
 def clear_inputs():
+    # Limpia entradas y borra historial.
     clear_history_file()
     return 0.0, 0.0, 0.0, 0.0, [], None
 
 # ------------------- Interfaz de Gradio -------------------
 def iris_interface():
+    # Crea la interfaz gráfica con Gradio para clasificación Iris.
     history = load_history()
     with gr.Blocks() as demo:
         gr.Markdown("## Clasificación Iris con Regresión Logística (Descenso de Gradiente Custom)")
