@@ -67,4 +67,9 @@ Para lanzar la interfaz web de forma local, ejecuta el siguiente comando:
 python main.py
 ```
 
+## Proyecto en línea
+
+Puedes acceder a la interfaz web desplegada en Hugging Face Spaces en el siguiente enlace:
+
+[https://huggingface.co/spaces/Axwell15/AN_proyecto](https://huggingface.co/spaces/Axwell15/AN_proyecto)
 
