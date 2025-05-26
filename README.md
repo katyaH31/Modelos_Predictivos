@@ -2,13 +2,13 @@
 
 **Integrantes**
 
-| Nº | Nombre completo                           |
-|----|-------------------------------------------|
-| 1  | ANTHONY ALEXANDER CANALES MARTINEZ        |
-| 2  | KATYA LISBETH HERRERA MOLINA              |
-| 3  | DANIELA IVETTE REINA MANZANARES           |
-| 4  | AXEL JARED HERNANDEZ SERVELLON            |
-| 5  | JOSUE ALFREDO MEJIA URIAS                 |
+| Nº | Nombre completo                           | Código       |
+|----|-------------------------------------------|--------------|
+| 1  | ANTHONY ALEXANDER CANALES MARTINEZ        | 00093122     |
+| 2  | KATYA LISBETH HERRERA MOLINA              | 00188119     |
+| 3  | DANIELA IVETTE REINA MANZANARES           | 00051316     |
+| 4  | AXEL JARED HERNANDEZ SERVELLON            | 00145319     |
+| 5  | JOSUE ALFREDO MEJIA URIAS                 | 00000921     |
 
 ## Parte 1: Documento con Investigación teórica
 Contiene el informe final y los archivos fuente en LaTeX del estudio comparativo de dos métodos numéricos de optimización: Gradiente Descendente y Newton-Raphson.
@@ -38,7 +38,7 @@ Ambos modelos comparten una implementación común del algoritmo de **descenso d
 
 ---
 
-## Requisitos para ejecutar el proyecto
+## Requisitos para ejecutar el proyecto Notebook de Jupyter en formato .ipynb
 
 Asegúrate de tener instalado Python 3.7 o superior.
 
@@ -51,3 +51,20 @@ Si estás utilizando Jupyter Notebook o Google Colab, puedes ejecutar el siguien
 ```bash
 !pip install pandas matplotlib seaborn numpy
 ```
+
+## Parte 3: INTERFAZ WEB 
+
+## Requisitos para ejecutar el proyecto de Interfaz Web (LOCAL)
+
+Puedes instalar los paquetes necesarios con:
+
+```bash
+pip install gradio pandas numpy scikit-learn
+```
+Para lanzar la interfaz web de forma local, ejecuta el siguiente comando:
+
+```bash
+python main.py
+```
+
+
